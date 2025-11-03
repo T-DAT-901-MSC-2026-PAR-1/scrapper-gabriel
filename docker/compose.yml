@@ -1,0 +1,18 @@
+services:
+  scrapper-dev:
+    profiles: [development]
+    build:
+      context: ..
+      dockerfile: ./docker/Dockerfile.dev
+    volumes:
+      # Mount source code for hot-reloading
+      - ..:/app
+      - venv:/app/.venv
+    environment:
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+    stdin_open: true
+    tty: true
+
+volumes:
+  venv:
