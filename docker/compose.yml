@@ -8,6 +8,7 @@ services:
       # Mount source code for hot-reloading
       - ..:/app
       - venv:/app/.venv
+    env_file: .env
     environment:
       - PYTHONUNBUFFERED=1
     restart: unless-stopped

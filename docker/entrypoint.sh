@@ -8,4 +8,4 @@ set -e
 export PATH="/app/.venv/bin:$PATH"
 
 # Run the application with auto-reload
-watchmedo auto-restart --directory=./src --pattern='*.py' --recursive -- python src/main.py
+watchmedo auto-restart --directory=./src --pattern='*.py' --recursive -- python src/scrapper/main.py
