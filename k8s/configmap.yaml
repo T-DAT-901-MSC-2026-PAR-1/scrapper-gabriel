@@ -1,0 +1,12 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: scrapper-config
+  namespace: scrapper
+data:
+  BOOTSTRAP_SERVERS: "kafka-cluster-kafka-bootstrap.strimzi.svc.cluster.local:9093"
+  WEBSOCKET_URI: "wss://stream.example.com/ws"  # Update with your actual WebSocket URI
+  KAFKA_TOPIC: "raw-trades-btc-usdt"
+  LOG_LEVEL: "INFO"
+  METRICS: "true"

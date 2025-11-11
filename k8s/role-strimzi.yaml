@@ -1,0 +1,11 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: scrapper-role-strimzi
+  namespace: strimzi
+rules:
+- apiGroups: [""]
+  resources: ["secrets"]
+  resourceNames: ["raw-trades-scrapper", "kafka-cluster-ca-cert"]
+  verbs: ["get"]

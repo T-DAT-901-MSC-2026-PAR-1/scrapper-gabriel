@@ -1,0 +1,134 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scrapper-producer
+  namespace: scrapper
+  labels:
+    app: scrapper-producer
+    version: v1
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: scrapper-producer
+  template:
+    metadata:
+      labels:
+        app: scrapper-producer
+        version: v1
+      annotations:
+        prometheus.io/scrape: "false"  # Disable if not using metrics
+    spec:
+      serviceAccountName: scrapper-sa
+      restartPolicy: Always
+
+      # Security context for the pod
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+
+      # Init container to validate connectivity
+      initContainers:
+      - name: wait-for-kafka
+        image: busybox:1.35
+        command: ['sh', '-c', 'echo "Waiting for Kafka..." && sleep 5']
+
+      containers:
+      - name: scrapper
+        image: scrapper:latest  # Update with your image registry and tag
+        imagePullPolicy: Always
+
+        # Environment variables from ConfigMap and Secret
+        envFrom:
+        - configMapRef:
+            name: scrapper-config
+
+        env:
+        - name: KAFKA_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: raw-trades-scrapper
+              namespace: strimzi
+              key: username
+        - name: KAFKA_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: raw-trades-scrapper
+              namespace: strimzi
+              key: password
+        - name: KAFKA_CA_CERT
+          value: /etc/kafka/secrets/ca.crt
+
+        # Volume mounts for CA certificate
+        volumeMounts:
+        - name: kafka-ca-cert
+          mountPath: /etc/kafka/secrets
+          readOnly: true
+
+        # Resource requests and limits
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+
+        # Liveness probe - check if the process is running
+        livenessProbe:
+          exec:
+            command:
+            - /bin/sh
+            - -c
+            - "ps aux | grep '[p]ython -m scrapper.main'"
+          initialDelaySeconds: 30
+          periodSeconds: 60
+          timeoutSeconds: 5
+          failureThreshold: 3
+
+        # Readiness probe - check if ready to accept traffic
+        readinessProbe:
+          exec:
+            command:
+            - /bin/sh
+            - -c
+            - "ps aux | grep '[p]ython -m scrapper.main'"
+          initialDelaySeconds: 10
+          periodSeconds: 30
+          timeoutSeconds: 5
+          failureThreshold: 2
+
+        # Graceful shutdown
+        lifecycle:
+          preStop:
+            exec:
+              command: ["/bin/sh", "-c", "sleep 10"]
+
+      # Volumes
+      volumes:
+      - name: kafka-ca-cert
+        secret:
+          secretName: kafka-cluster-ca-cert
+          namespace: strimzi
+          defaultMode: 0400
+
+      # Pod anti-affinity for distribution
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - scrapper-producer
+              topologyKey: kubernetes.io/hostname
