@@ -1,0 +1,65 @@
+# Production Dockerfile for scrapper
+# Multi-stage build for minimal image size
+
+# Stage 1: Builder
+FROM ghcr.io/astral-sh/uv:debian AS builder
+
+WORKDIR /app
+
+# Install build dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy project files
+COPY pyproject.toml uv.lock ./
+
+# Create virtual environment
+RUN uv venv /app/.venv
+RUN /app/.venv/bin/python -m pip install --upgrade pip setuptools wheel
+
+# Install dependencies into the virtual environment
+RUN uv sync --frozen --python /app/.venv/bin/python
+
+# Copy application code
+COPY src ./src
+
+# Install the package
+RUN /app/.venv/bin/pip install .
+
+# Stage 2: Runtime
+FROM debian:bookworm-slim
+
+WORKDIR /app
+
+# Install only runtime dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    tini \
+    ca-certificates \
+    libssl3 \
+    libsasl2-2 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create non-root user for security
+RUN useradd -m -u 1000 scrapper
+
+# Copy virtual environment from builder
+COPY --from=builder --chown=scrapper:scrapper /app/.venv /app/.venv
+
+# Copy application code
+COPY --chown=scrapper:scrapper src ./src
+COPY --chown=scrapper:scrapper docker/entrypoint.prod.sh ./entrypoint.sh
+
+# Set environment variables
+ENV PATH="/app/.venv/bin:$PATH" \
+    PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1
+
+# Make entrypoint executable
+RUN chmod +x /app/entrypoint.sh
+
+# Switch to non-root user
+USER scrapper
+
+# Use tini to handle signals properly
+ENTRYPOINT ["/usr/bin/tini", "--", "/bin/bash", "/app/entrypoint.sh"]

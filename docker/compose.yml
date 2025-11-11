@@ -8,12 +8,22 @@ services:
       # Mount source code for hot-reloading
       - ..:/app
       - venv:/app/.venv
-    env_file: .env
     environment:
       - PYTHONUNBUFFERED=1
+      - LOG_LEVEL=DEBUG
+      - WEBSOCKET_URI=${WEBSOCKET_URI}
+      - BOOTSTRAP_SERVERS=${BOOTSTRAP_SERVERS}
+      - KAFKA_TOPIC=${KAFKA_TOPIC}
     restart: unless-stopped
     stdin_open: true
     tty: true
+    command: /app/docker/entrypoint.dev.sh
+    networks:
+      - kafka_default
 
 volumes:
   venv:
+
+networks:
+  kafka_default:
+    external: true
