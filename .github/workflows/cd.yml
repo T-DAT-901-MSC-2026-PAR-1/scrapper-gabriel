@@ -43,11 +43,12 @@ jobs:
 
       - name: Update image tag in deployment
         run: |
-          # Get the commit SHA from the triggering workflow
-          COMMIT_SHA="${{ github.event.workflow_run.head_commit }}"
+          # Get the commit SHA from the triggering CI workflow
+          # Use head_sha which is the actual commit SHA string
+          COMMIT_SHA="${{ github.event.workflow_run.head_sha }}"
 
-          # If empty or null, use github.sha as fallback
-          if [ -z "$COMMIT_SHA" ] || [ "$COMMIT_SHA" = "null" ]; then
+          # If empty, use github.sha as fallback
+          if [ -z "$COMMIT_SHA" ]; then
             COMMIT_SHA="${{ github.sha }}"
             echo "Using github.sha as fallback: $COMMIT_SHA"
           fi
