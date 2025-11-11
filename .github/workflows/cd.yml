@@ -1,0 +1,83 @@
+name: CD
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  update-deployment:
+    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' }}
+    runs-on: ubuntu-latest
+    name: Update Deployment Manifest
+
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=sha,prefix={{branch}}-
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+
+      - name: Install yq
+        run: |
+          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+
+      - name: Update image tag in deployment
+        env:
+          IMAGE_TAG: ${{ steps.meta.outputs.version }}
+          MAIN_BRANCH_TAG: main
+        run: |
+          # Get the commit SHA for fallback tagging
+          COMMIT_SHA=${{ github.event.workflow_run.head_commit }}
+          SHORT_SHA=${COMMIT_SHA:0:7}
+          MAIN_TAG="main-${SHORT_SHA}"
+
+          # Build the full image reference
+          FULL_IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${MAIN_TAG}"
+
+          echo "Updating deployment image to: ${FULL_IMAGE}"
+
+          # Update the deployment manifest using yq
+          yq -i ".spec.template.spec.containers[0].image = \"${FULL_IMAGE}\"" k8s/deployment.yaml
+
+      - name: Verify update
+        run: |
+          echo "Updated deployment manifest:"
+          yq '.spec.template.spec.containers[0].image' k8s/deployment.yaml
+
+      - name: Commit and push changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+
+          # Check if there are changes to commit
+          if git diff --quiet k8s/deployment.yaml; then
+            echo "No changes to commit"
+            exit 0
+          fi
+
+          git add k8s/deployment.yaml
+          git commit -m "chore: Update deployment image to latest build
+
+          Updated by CD workflow for commit: ${{ github.event.workflow_run.head_commit }}"
+
+          git push origin main

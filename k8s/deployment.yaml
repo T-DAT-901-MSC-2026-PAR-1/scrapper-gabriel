@@ -42,7 +42,7 @@ spec:
 
       containers:
       - name: scrapper
-        image: scrapper:latest  # Update with your image registry and tag
+        image: ghcr.io/glopez/scrapper-gabriel:main  # Updated by CD workflow
         imagePullPolicy: Always
 
         # Environment variables from ConfigMap and Secret
