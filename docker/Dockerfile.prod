@@ -13,19 +13,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # Copy project files
 COPY pyproject.toml uv.lock ./
+COPY src ./src
 
 # Create virtual environment
 RUN uv venv /app/.venv
-RUN /app/.venv/bin/python -m pip install --upgrade pip setuptools wheel
 
 # Install dependencies into the virtual environment
 RUN uv sync --frozen --python /app/.venv/bin/python
-
-# Copy application code
-COPY src ./src
-
-# Install the package
-RUN /app/.venv/bin/pip install .
 
 # Stage 2: Runtime
 FROM debian:bookworm-slim
