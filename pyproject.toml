@@ -1,13 +1,31 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "scrapper-gabriel"
 version = "0.1.0"
-description = "Add your description here"
+description = "Websocket data scrapper for cryptocurrency trades analysis"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "asyncio>=4.0.0",
-    "pandas>=2.3.3",
+    "confluent-kafka>=2.12.2",
     "ruff>=0.14.3",
     "watchdog>=6.0.0",
     "websockets>=15.0.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pre-commit>=3.0.0",
+]
+
+[tool.setuptools]
+packages = ["scrapper"]
+package-dir = {"" = "src"}
+
+[dependency-groups]
+dev = [
+    "pre-commit",
 ]

@@ -1,0 +1,41 @@
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+
+repos:
+  # General file checks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+        args: [--unsafe]
+      - id: check-added-large-files
+      - id: check-merge-conflict
+      - id: debug-statements
+      - id: mixed-line-ending
+
+  # Ruff linting
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.14.3
+    hooks:
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
+
+  # Python type checking (optional - uncomment if needed)
+  # - repo: https://github.com/pre-commit/mirrors-mypy
+  #   rev: v1.7.0
+  #   hooks:
+  #     - id: mypy
+  #       additional_dependencies: []
+
+# Configuration for pre-commit
+default_language_version:
+  python: python3.13
+
+# Skip slow hooks on certain CI systems
+ci:
+  skip: []
+  autofix_commit_msg: "refactor: auto-fix pre-commit hooks"
+  autofix_stage: untracked
