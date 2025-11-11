@@ -51,8 +51,9 @@ jobs:
           SHORT_SHA=${COMMIT_SHA:0:7}
           MAIN_TAG="main-${SHORT_SHA}"
 
-          # Build the full image reference
+          # Build the full image reference with lowercase (OCI requirement)
           FULL_IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${MAIN_TAG}"
+          FULL_IMAGE=$(echo "${FULL_IMAGE}" | tr '[:upper:]' '[:lower:]')
 
           echo "Updating deployment image to: ${FULL_IMAGE}"
 
