@@ -3,7 +3,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: scrapper-config
-  namespace: scrapper
+  namespace: cryptoviz
 data:
   BOOTSTRAP_SERVERS: "kafka-cluster-kafka-bootstrap.strimzi.svc.cluster.local:9093"
   WEBSOCKET_URI: "wss://streamer.cryptocompare.com/v2?format=streamer"
