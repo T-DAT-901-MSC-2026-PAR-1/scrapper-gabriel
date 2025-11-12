@@ -50,13 +50,11 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: raw-trades-scrapper
-                  namespace: strimzi
                   key: username
             - name: KAFKA_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: raw-trades-scrapper
-                  namespace: strimzi
                   key: password
             - name: KAFKA_CA_CERT
               value: /etc/kafka/secrets/ca.crt
@@ -105,7 +103,6 @@ spec:
         - name: kafka-ca-cert
           secret:
             secretName: kafka-cluster-ca-cert
-            namespace: strimzi
             defaultMode: 0400
       # Pod anti-affinity for distribution
       affinity:

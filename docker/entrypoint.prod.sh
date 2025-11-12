@@ -34,4 +34,4 @@ echo "  Websocket URI: $WEBSOCKET_URI"
 echo "  Kafka Topic: $KAFKA_TOPIC"
 
 # Run the application
-exec python -m scrapper.main
+exec /app/.venv/bin/python -m scrapper.main
