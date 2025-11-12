@@ -39,7 +39,7 @@ spec:
           command: ['sh', '-c', 'echo "Waiting for Kafka..." && sleep 5']
       containers:
         - name: scrapper
-          image: ghcr.io/t-dat-901-msc-2026-par-1/scrapper-gabriel:main-ed4ecba # Updated by CD workflow
+          image: ghcr.io/t-dat-901-msc-2026-par-1/scrapper-gabriel:main-c0d6739 # Updated by CD workflow
           imagePullPolicy: Always
           # Environment variables from ConfigMap and Secret
           envFrom:
