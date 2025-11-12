@@ -5,7 +5,7 @@ metadata:
   name: scrapper-config
   namespace: cryptoviz
 data:
-  BOOTSTRAP_SERVERS: "kafka-cluster-kafka-bootstrap.strimzi.svc.cluster.local:9093"
+  BOOTSTRAP_SERVERS: "kafka-kafka-bootstrap.strimzi.svc.cluster.local:9093"
   WEBSOCKET_URI: "wss://streamer.cryptocompare.com/v2?format=streamer"
   KAFKA_TOPIC: "raw-trades-btc-usdt"
   LOG_LEVEL: "INFO"
