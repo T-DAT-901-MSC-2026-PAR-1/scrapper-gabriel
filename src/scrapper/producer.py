@@ -5,29 +5,9 @@ from confluent_kafka import Producer
 logger = logging.getLogger(__name__)
 
 CONFIG = {
-    # === Mandatory parameters ===
     "bootstrap.servers": os.environ.get("BOOTSTRAP_SERVERS"),
-    # === Identification ===
     "client.id": "scrapper-raw-trades-btc-usdt",
-    # === Security (SCRAM-SHA-512 with TLS) ===
-    "security.protocol": "SASL_SSL",
-    "sasl.mechanism": "SCRAM-SHA-512",
-    "sasl.username": os.environ.get("KAFKA_USERNAME"),
-    "sasl.password": os.environ.get("KAFKA_PASSWORD"),
-    # === TLS Configuration ===
-    "ssl.ca.location": os.environ.get(
-        "KAFKA_CA_CERT", "/etc/ssl/certs/ca-certificates.crt"
-    ),
-    "ssl.endpoint.identification.algorithm": "none",  # Set to 'none' for self-signed certs, use 'https' for production
-    # === Performance ===
-    # 'batch.size': 16384,              # Taille du batch en bytes
-    # 'linger.ms': 10,                   # Temps d'attente pour remplir un batch
-    # 'compression.type': 'snappy',      # Type de compression (none, gzip, snappy, lz4, zstd)
-    # 'buffer.memory': 33554432,         # Mémoire totale disponible pour le buffering
-    # === Reliability ===
-    # 'acks': 'all',                     # 0, 1, ou 'all' pour la garantie de livraison
-    # 'retries': 3,                      # Nombre de tentatives en cas d'erreur
-    # 'max.in.flight.requests.per.connection': 5,
+    "security.protocol": "PLAINTEXT",
 }
 
 
