@@ -45,7 +45,7 @@ ENV PATH="/app/.venv/bin:$PATH"
 
 # Copy application code
 COPY --chown=scrapper:scrapper src ./src
-COPY --chown=scrapper:scrapper docker/entrypoint.prod.sh ./entrypoint.sh
+COPY --chown=scrapper:scrapper docker/prod/entrypoint.sh ./entrypoint.sh
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1 \
