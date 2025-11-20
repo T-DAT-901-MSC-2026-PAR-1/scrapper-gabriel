@@ -1,14 +1,16 @@
-default: 
+default:
     just --list
 
-up:
-    docker compose --profile develop --file ./docker/compose.yml up scrapper-dev
+# Bring up compose for an environment (default: dev)
+up ENV = "dev":
+    docker compose --file ./docker/{{ENV}}/compose.yml up
 
-down:
-    docker compose --profile develop --file ./docker/compose.yml down
+# Bring down compose for an environment (default: dev)
+down ENV = "dev":
+    docker compose --file ./docker/{{ENV}}/compose.yml down
 
 shell:
     docker exec -it docker-scrapper-dev-1 bash
 
-# logs:
-#     docker compose --file ./docker/compose.yml logs --follow
+logs ENV = "dev":
+    docker compose --file ./docker/{{ENV}}/compose.yml logs --follow
