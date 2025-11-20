@@ -1,16 +1,47 @@
-services:
-  scrapper:
-    image: ghcr.io/t-dat-901-msc-2026-par-1/scrapper-gabriel:main
-    env_file: .env
-    restart: unless-stopped
-    stdin_open: true
-    tty: true
-    networks:
-      - kafka_kafka
+x-common-service: &common-service
+  image: ghcr.io/t-dat-901-msc-2026-par-1/scrapper-gabriel:main
+  restart: unless-stopped
+  stdin_open: true
+  tty: true
+  networks:
+    - kafka_kafka
 
-volumes:
-  venv:
+x-common-env: &common-env
+  WEBSOCKET_URI: "wss://streamer.cryptocompare.com/v2?format=streamer"
+  BOOTSTRAP_SERVERS: "kafka-node-1:9092,kafka-node-2:9092,kafka-node-3:9092"
+  QUOTE: "USDT"
 
 networks:
   kafka_kafka:
     external: true
+
+services:
+  scrapper-btc-usdt:
+    <<: *common-service
+    environment:
+      <<: *common-env
+      BASE: "BTC"
+
+  scrapper-eth-usdt:
+    <<: *common-service
+    environment:
+      <<: *common-env
+      BASE: "ETH"
+
+  scrapper-sol-usdt:
+    <<: *common-service
+    environment:
+      <<: *common-env
+      BASE: "SOL"
+
+  scrapper-xrp-usdt:
+    <<: *common-service
+    environment:
+      <<: *common-env
+      BASE: "xrp"
+
+  scrapper-usdc-usdt:
+    <<: *common-service
+    environment:
+      <<: *common-env
+      BASE: "USDC"
