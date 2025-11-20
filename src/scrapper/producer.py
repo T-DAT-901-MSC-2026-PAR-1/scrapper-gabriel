@@ -4,9 +4,13 @@ from confluent_kafka import Producer
 
 logger = logging.getLogger(__name__)
 
+base = os.environ.get("BASE")
+quote = os.environ.get("QUOTE")
+client_id = f"scrapper-raw-trades-{base}-{quote}".lower()
+
 CONFIG = {
     "bootstrap.servers": os.environ.get("BOOTSTRAP_SERVERS"),
-    "client.id": "scrapper-raw-trades-btc-usdt",
+    "client.id": client_id,
     "security.protocol": "PLAINTEXT",
 }
 

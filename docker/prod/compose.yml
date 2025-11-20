@@ -1,23 +1,16 @@
 services:
   scrapper:
     image: ghcr.io/t-dat-901-msc-2026-par-1/scrapper-gabriel:main
-    environment:
-      - PYTHONUNBUFFERED=1
-      - LOG_LEVEL=DEBUG
-      - WEBSOCKET_URI=${WEBSOCKET_URI}
-      - BOOTSTRAP_SERVERS=${BOOTSTRAP_SERVERS}
-      - KAFKA_TOPIC=${KAFKA_TOPIC}
-      - KAFKA_USERNAME=${KAFKA_USERNAME}
-      - KAFKA_PASSWORD=${KAFKA_PASSWORD}
+    env_file: .env
     restart: unless-stopped
     stdin_open: true
     tty: true
     networks:
-      - cryptoviz_network
+      - kafka_kafka
 
 volumes:
   venv:
 
 networks:
-  cryptoviz_network:
+  kafka_kafka:
     external: true

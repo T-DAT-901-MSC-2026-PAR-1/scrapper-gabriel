@@ -3,7 +3,7 @@ import asyncio
 import json
 import websockets
 import time
-from scrapper.settings import REQUEST
+from scrapper.settings import get_request
 from scrapper.producer import producer
 
 
@@ -17,7 +17,8 @@ async def main():
     last_report_time = start_time
 
     async with websockets.connect(url) as websocket:
-        await websocket.send(json.dumps(REQUEST))
+        request = get_request()
+        await websocket.send(json.dumps(request))
         while True:
             try:
                 data = await websocket.recv()
@@ -46,12 +47,21 @@ async def main():
 
                 # Display data
                 if data.startswith("0"):
-                    topic = os.environ.get("KAFKA_TOPIC")
+                    # Build topic from BASE and QUOTE environment variables.
+                    base = os.environ.get("BASE", "").lower()
+                    quote = os.environ.get("QUOTE", "").lower()
+                    topic = f"raw-trades-{base}-{quote}"
                     producer.list_topics(topic)
                     producer.produce(
                         topic=topic,
                         value=data.encode("utf-8") if isinstance(data, str) else data,
                     )
+
+                    # note: message_count is incremented earlier when data is received;
+                    # avoid double-counting here.
+
+                    if message_count % 1000 == 0:  # Flush every 1000 messages
+                        producer.flush()
 
             except websockets.ConnectionClosed:
                 break
@@ -68,4 +78,6 @@ async def main():
 
 
 if __name__ == "__main__":
-    asyncio.get_event_loop().run_until_complete(main())
+    # Use asyncio.run() which is the modern, recommended API and avoids
+    # DeprecationWarning about missing current event loop.
+    asyncio.run(main())
